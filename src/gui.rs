@@ -1,5 +1,6 @@
 use eframe::egui;
 use rand::Rng;
+use std::time::{Duration, Instant};
 
 // Struct for color settings
 pub struct drawColor{
@@ -20,6 +21,10 @@ pub struct MyApp{
     current_step: usize, // Current step in the sorting process
     comparing_indices: Vec<usize>, // Indices currently being compared
     current_algorithm: SortAlgorithm, // Currently selected sorting algorithm
+    sorting_steps: Vec<SortingStep>,  // Pre-generated animation steps
+    sorted_indices: Vec<bool>,        // Track which bars are sorted
+    animation_speed: Duration,       // Control animation speed
+    last_update: Instant,            // For timing animation
 }
 
 // Enum for sorting algorithms
@@ -30,6 +35,14 @@ enum SortAlgorithm{
     SelectionSort,
 }
 
+// Enum for animation steps
+#[derive(Debug, Clone)]
+pub enum SortingStep {
+    Compare(usize, usize),  // Compare two indices
+    Swap(usize, usize),     // Swap two indices
+    SetSorted(usize),       // Mark index as sorted
+    Finished,               // Animation complete
+}
 
 // Implement Default trait for MyApp
 impl Default for drawColor{
@@ -59,6 +72,10 @@ impl Default for MyApp {
             current_step: 0,
             comparing_indices: Vec::new(),
             current_algorithm: SortAlgorithm::BubbleSort,
+            sorting_steps: Vec::new(),
+            sorted_indices: Vec::new(),
+            animation_speed: Duration::from_millis(100), // Default speed
+            last_update: Instant::now(),
 
         }
     }
@@ -75,12 +92,14 @@ impl MyApp{
     fn generate_random_list(&mut self, size: usize, max_value: i32) {
 
         let mut rng = rand::thread_rng();
-        let mut min_value = 20;
+        let min_value = 20;
         // Make a list up to the given size with random values between min_value and max_value
         self.list = (0..size).map(|_| rng.gen_range(min_value..=max_value)).collect();
         self.is_sorting = false;
         self.current_step = 0;
         self.comparing_indices.clear();
+        self.sorting_steps.clear();
+        self.sorted_indices = vec![false; size];
 
     }// End fn generate_random_list
 
@@ -120,11 +139,13 @@ impl MyApp{
                     let bar_height = (value as f32 / max_value) * max_height;
                     let x = rect.left() + (i as f32 * bar_width);
                 
-                    // Determine color based on whether the bar is being compared
+                    // Determine color based on state
                     let color = if self.comparing_indices.contains(&i) {
-                        self.colors.highlight
+                        self.colors.highlight  // RED - being compared
+                    } else if i < self.sorted_indices.len() && self.sorted_indices[i] {
+                        self.colors.sorted     // BLUE - sorted
                     } else {
-                        self.colors.bar
+                        self.colors.bar        // GREEN - unsorted
                     };// End if else
                 
                     // Create rectangle from baseline upward
@@ -142,6 +163,53 @@ impl MyApp{
         );// End of ui.allocate_ui_with_layout
 
     }// End fn generate_bars
+
+    // Animation update method using steps
+    fn update_animation(&mut self, ctx: &egui::Context) {
+        if !self.is_sorting || self.current_step >= self.sorting_steps.len() {
+            return;
+        }
+
+        // Check if enough time has passed
+        if self.last_update.elapsed() >= self.animation_speed {
+            // Get current step
+            if let Some(step) = self.sorting_steps.get(self.current_step) {
+                match step {
+                    
+                    SortingStep::Compare(i, j) => {
+                        self.comparing_indices = vec![*i, *j];
+                    }
+                    SortingStep::Swap(i, j) => {
+                        self.list.swap(*i, *j);
+                        self.comparing_indices = vec![*i, *j];
+                    }
+                    SortingStep::SetSorted(i) => {
+                        if *i < self.sorted_indices.len() {
+                            self.sorted_indices[*i] = true;
+                        }
+                        self.comparing_indices.clear();
+                    }
+                    SortingStep::Finished => {
+                        self.is_sorting = false;
+                        self.comparing_indices.clear();
+                        for i in 0..self.sorted_indices.len() {
+                            self.sorted_indices[i] = true;
+                        }
+                    }
+
+                }// End match
+
+            }// end inner if let
+            
+            self.current_step += 1;
+            self.last_update = Instant::now();
+            ctx.request_repaint();
+
+        }// End if 
+
+    }// End fn update_animation
+
+
 
     // Dropdown menu for selecting sorting algorithm
     fn drop_down_menu(&mut self, ui: &mut egui::Ui) {
@@ -168,11 +236,15 @@ impl MyApp{
 impl eframe::App for MyApp{
     
     fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame){
+        // THIS CALLS THE ANIMATION UPDATE!
+        self.update_animation(ctx);
     
         egui::CentralPanel::default().show(ctx, |ui| {
 
             if ui.button("Generate Random List").clicked(){
                 self.generate_random_list(100, 500);
+                self.sorting_steps.clear();
+                self.sorted_indices = vec![false; self.list.len()];
             }
 
             // Dropdown menu for selecting sorting algorithm

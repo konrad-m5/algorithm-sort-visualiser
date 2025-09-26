@@ -1,6 +1,7 @@
 mod gui;
 
 use gui::SortAlgorithm;
+use gui::SortingStep;
 
 
 // Bubble sort
