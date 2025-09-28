@@ -27,6 +27,7 @@ pub struct MyApp{
     sorted_indices: Vec<bool>,        // Track which bars are sorted
     animation_speed: Duration,       // Control animation speed
     last_update: Instant,            // For timing animation
+    speed_multiplier: u32,           // Speed multiplier for ultra-fast mode
 }
 
 // Enum for sorting algorithms
@@ -85,8 +86,9 @@ impl Default for MyApp {
             current_algorithm: SortAlgorithm::BubbleSort,
             sorting_steps: Vec::new(),
             sorted_indices,
-            animation_speed: Duration::from_millis(1), // Default speed
+            animation_speed: Duration::from_millis(0), // Instant speed
             last_update: Instant::now(),
+            speed_multiplier: 10,                    // Process 10 steps per frame
 
         }
     }
@@ -183,36 +185,47 @@ impl MyApp{
 
         // Check if enough time has passed
         if self.last_update.elapsed() >= self.animation_speed {
-            // Get current step
-            if let Some(step) = self.sorting_steps.get(self.current_step) {
-                match step {
-                    
-                    SortingStep::Compare(i, j) => {
-                        self.comparing_indices = vec![*i, *j];
-                    }
-                    SortingStep::Swap(i, j) => {
-                        self.list.swap(*i, *j);
-                        self.comparing_indices = vec![*i, *j];
-                    }
-                    SortingStep::SetSorted(i) => {
-                        if *i < self.sorted_indices.len() {
-                            self.sorted_indices[*i] = true;
-                        }
-                        self.comparing_indices.clear();
-                    }
-                    SortingStep::Finished => {
-                        self.is_sorting = false;
-                        self.comparing_indices.clear();
-                        for i in 0..self.sorted_indices.len() {
-                            self.sorted_indices[i] = true;
-                        }
-                    }
-
-                }// End match
-
-            }// end inner if let
+            // Process multiple steps per frame for ultra-fast animation
+            let steps_per_frame = self.speed_multiplier; // Use dynamic speed multiplier
             
-            self.current_step += 1;
+            for _ in 0..steps_per_frame {
+                if self.current_step >= self.sorting_steps.len() {
+                    break;
+                }
+                
+                // Get current step
+                if let Some(step) = self.sorting_steps.get(self.current_step) {
+                    match step {
+                        
+                        SortingStep::Compare(i, j) => {
+                            self.comparing_indices = vec![*i, *j];
+                        }
+                        SortingStep::Swap(i, j) => {
+                            self.list.swap(*i, *j);
+                            self.comparing_indices = vec![*i, *j];
+                        }
+                        SortingStep::SetSorted(i) => {
+                            if *i < self.sorted_indices.len() {
+                                self.sorted_indices[*i] = true;
+                            }
+                            self.comparing_indices.clear();
+                        }
+                        SortingStep::Finished => {
+                            self.is_sorting = false;
+                            self.comparing_indices.clear();
+                            for i in 0..self.sorted_indices.len() {
+                                self.sorted_indices[i] = true;
+                            }
+                            return; // Exit early when finished
+                        }
+
+                    }// End match
+
+                }// end inner if let
+                
+                self.current_step += 1;
+            }
+            
             self.last_update = Instant::now();
             ctx.request_repaint();
 
@@ -293,6 +306,10 @@ impl eframe::App for MyApp{
 
                 // Dropdown menu for selecting sorting algorithm
                 self.drop_down_menu(ui);
+
+                // Speed control slider
+                ui.label("Speed:");
+                ui.add(egui::Slider::new(&mut self.speed_multiplier, 1..=100).text("steps/frame"));
 
             });// end ui.horizontal
             
