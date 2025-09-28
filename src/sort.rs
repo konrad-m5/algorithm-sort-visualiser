@@ -1,24 +1,30 @@
-mod gui;
-
-use gui::SortAlgorithm;
-use gui::SortingStep;
+use crate::gui::SortAlgorithm;
+use crate::gui::SortingStep;
 
 
 // Bubble sort
-fn bubble_sort(arr: &mut Vec<i32>) -> &mut Vec<i32> {
-    let mut swapped = true;
+pub fn bubble_sort(list: &mut Vec<i32>) -> Vec<SortingStep> {
 
-    while swapped {
-        swapped = false;
-        for i in 0..arr.len()-1 {
-            if arr[i] > arr[i + 1] {
-                arr.swap(i, i + 1);
-                swapped = true;
-            }
-        }
+  let n = list.len();
+  let mut steps = Vec::new();
+
+  for i in 0..n {
+    let mut swapped = false;
+    for j in 0..(n - i - 1) {
+      steps.push(SortingStep::Compare(j, (j + 1)));
+      if list[j] > list[j + 1] {
+        list.swap(j, j + 1);
+        steps.push(SortingStep::Swap(j, (j + 1)));
+        swapped = true;
+      }
     }
+    if !swapped {
+      break;
+    }
+  }
 
-    return arr;
+  steps.push(SortingStep::Finished);
+  steps
 }
 
 // Quick sort

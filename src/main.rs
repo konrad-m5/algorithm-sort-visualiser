@@ -2,6 +2,8 @@ use eframe::egui;
 use rand::Rng;
 
 mod gui;
+mod sort;  // Declare the sort module here
+use crate::sort::bubble_sort;  // Import from the crate root
 use gui::MyApp;
 
 fn main() -> Result<(), eframe::Error> {

@@ -1,6 +1,7 @@
 use eframe::egui;
 use rand::Rng;
 use std::time::{Duration, Instant};
+use crate::sort::{bubble_sort};
 
 // Struct for color settings
 pub struct drawColor{
@@ -29,7 +30,7 @@ pub struct MyApp{
 
 // Enum for sorting algorithms
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum SortAlgorithm{
+pub enum SortAlgorithm{
     BubbleSort,
     InsertionSort,
     SelectionSort,
@@ -74,7 +75,7 @@ impl Default for MyApp {
             current_algorithm: SortAlgorithm::BubbleSort,
             sorting_steps: Vec::new(),
             sorted_indices: Vec::new(),
-            animation_speed: Duration::from_millis(100), // Default speed
+            animation_speed: Duration::from_millis(10), // Default speed
             last_update: Instant::now(),
 
         }
@@ -206,7 +207,7 @@ impl MyApp{
             ctx.request_repaint();
 
         }// End if 
-
+        ctx.request_repaint();
     }// End fn update_animation
 
 
@@ -228,6 +229,21 @@ impl MyApp{
 
     }// End fn drop_down_menu
 
+    // Generate sorting steps based on selected algorithm
+    fn generate_sorting_steps(&mut self) -> Vec<SortingStep> {
+        let mut list_copy = self.list.clone();
+        match self.current_algorithm {
+            SortAlgorithm::BubbleSort => bubble_sort(&mut list_copy),
+            SortAlgorithm::InsertionSort => {
+                // Placeholder: Implement insertion_sort_steps function
+                Vec::new() // Replace with actual implementation
+            }
+            SortAlgorithm::SelectionSort => {
+                // Placeholder: Implement selection_sort_steps function
+                Vec::new() // Replace with actual implementation
+            }
+        }
+    }// End fn generate_sorting_steps
 
 } // End impl MyApp
 
@@ -236,29 +252,37 @@ impl MyApp{
 impl eframe::App for MyApp{
     
     fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame){
-        // THIS CALLS THE ANIMATION UPDATE!
+        // animation update
         self.update_animation(ctx);
     
         egui::CentralPanel::default().show(ctx, |ui| {
 
-            if ui.button("Generate Random List").clicked(){
-                self.generate_random_list(100, 500);
-                self.sorting_steps.clear();
-                self.sorted_indices = vec![false; self.list.len()];
-            }
+            // Top panl with buttons and dropdown menu
+            ui.horizontal(|ui| {
 
-            // Dropdown menu for selecting sorting algorithm
-            self.drop_down_menu(ui);
+                if ui.button("Generate Random List").clicked(){
+                    self.generate_random_list(100, 500);
+                    self.sorting_steps.clear();
+                    self.sorted_indices = vec![false; self.list.len()];
+                }// end if
 
-            if ui.button("Start Sorting").clicked(){
-                self.is_sorting = true;
-                self.current_step = 0;
-                self.comparing_indices.clear();
-                self.current_algorithm = self.current_algorithm;
-            }
+                if ui.button("Start Sorting").clicked(){
+                    self.is_sorting = true;
+                    self.current_step = 0;
+                    self.comparing_indices.clear();
+                    // Generate sorting steps based on algorithm
+                    self.sorting_steps = self.generate_sorting_steps();
+                    self.current_algorithm = self.current_algorithm;
+                }// end if 
+
+                // Dropdown menu for selecting sorting algorithm
+                self.drop_down_menu(ui);
+
+            });// end ui.horizontal
+            
 
             // Some padding
-            ui.add_space(150.0);
+            ui.add_space(200.0);
             self.generate_bars(ui);
 
         });
