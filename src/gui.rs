@@ -1,7 +1,8 @@
 use eframe::egui;
+use rodio::{OutputStream, Sink, source::SineWave};
 use rand::Rng;
 use std::time::{Duration, Instant};
-use crate::sort::{bubble_sort};
+use crate::sort::{bubble_sort, selection_sort, insertion_sort};
 
 // Struct for color settings
 pub struct drawColor{
@@ -66,16 +67,25 @@ impl Default for drawColor{
 // Implement Default trait for MyApp
 impl Default for MyApp {
     fn default() -> Self {
+        let mut rng = rand::thread_rng();
+        let size = 100;
+        let min_value = 20;
+        let max_value = 500;
+        
+        // Generate random list on startup
+        let list: Vec<i32> = (0..size).map(|_| rng.gen_range(min_value..=max_value)).collect();
+        let sorted_indices = vec![false; list.len()];
+        
         Self {
-            list: Vec::new(),
+            list,
             colors: drawColor::default(),
             is_sorting: false,
             current_step: 0,
             comparing_indices: Vec::new(),
             current_algorithm: SortAlgorithm::BubbleSort,
             sorting_steps: Vec::new(),
-            sorted_indices: Vec::new(),
-            animation_speed: Duration::from_millis(10), // Default speed
+            sorted_indices,
+            animation_speed: Duration::from_millis(1), // Default speed
             last_update: Instant::now(),
 
         }
@@ -234,16 +244,18 @@ impl MyApp{
         let mut list_copy = self.list.clone();
         match self.current_algorithm {
             SortAlgorithm::BubbleSort => bubble_sort(&mut list_copy),
-            SortAlgorithm::InsertionSort => {
-                // Placeholder: Implement insertion_sort_steps function
-                Vec::new() // Replace with actual implementation
-            }
-            SortAlgorithm::SelectionSort => {
-                // Placeholder: Implement selection_sort_steps function
-                Vec::new() // Replace with actual implementation
-            }
+            SortAlgorithm::InsertionSort => {insertion_sort(&mut list_copy)}
+            SortAlgorithm::SelectionSort => {selection_sort(&mut list_copy)}
         }
     }// End fn generate_sorting_steps
+
+    fn stop_button(&mut self){
+        self.is_sorting = false;
+        self.current_step = 0;
+        self.comparing_indices.clear();
+        self.sorted_indices = vec![false; self.list.len()];
+    }
+
 
 } // End impl MyApp
 
@@ -274,6 +286,10 @@ impl eframe::App for MyApp{
                     self.sorting_steps = self.generate_sorting_steps();
                     self.current_algorithm = self.current_algorithm;
                 }// end if 
+
+                if ui.button("Stop Sorting").clicked(){
+                    self.stop_button();
+                }// end if
 
                 // Dropdown menu for selecting sorting algorithm
                 self.drop_down_menu(ui);

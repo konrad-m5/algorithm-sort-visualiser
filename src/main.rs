@@ -1,4 +1,5 @@
 use eframe::egui;
+use rodio::{OutputStream, Sink, source::SineWave};
 use rand::Rng;
 
 mod gui;
