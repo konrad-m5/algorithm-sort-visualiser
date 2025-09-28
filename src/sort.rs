@@ -81,3 +81,4 @@ pub fn insertion_sort(list: &mut Vec<i32>) -> Vec<SortingStep> {
   steps.push(SortingStep::Finished);
   steps
 }
+
