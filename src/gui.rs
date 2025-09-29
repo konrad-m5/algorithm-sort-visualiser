@@ -86,20 +86,24 @@ impl Default for MyApp {
             current_algorithm: SortAlgorithm::BubbleSort,
             sorting_steps: Vec::new(),
             sorted_indices,
-            animation_speed: Duration::from_millis(0), // Instant speed
+            animation_speed: Duration::from_millis(0), 
             last_update: Instant::now(),
             speed_multiplier: 10,                    // Process 10 steps per frame
 
-        }
-    }
-}
+        }// End Self
+    
+    }// End fn default
+
+}// End impl Default for MyApp
 
 impl MyApp{
 
     // Constructor method
     fn new() -> Self{
+
         Self::default()
-    }
+
+    }// End fn new
 
     // Generate random list of integers 
     fn generate_random_list(&mut self, size: usize, max_value: i32) {
@@ -197,6 +201,7 @@ impl MyApp{
                 if let Some(step) = self.sorting_steps.get(self.current_step) {
                     match step {
                         
+                        // Handle each step type
                         SortingStep::Compare(i, j) => {
                             self.comparing_indices = vec![*i, *j];
                         }
@@ -223,6 +228,7 @@ impl MyApp{
 
                 }// end inner if let
                 
+                // Move to next step
                 self.current_step += 1;
             }
             
@@ -244,11 +250,11 @@ impl MyApp{
                 ui.selectable_value(&mut selected_algorithm, SortAlgorithm::BubbleSort, "Bubble Sort");
                 ui.selectable_value(&mut selected_algorithm, SortAlgorithm::InsertionSort, "Insertion Sort");
                 ui.selectable_value(&mut selected_algorithm, SortAlgorithm::SelectionSort, "Selection Sort");
-            });
+            });// End of ComboBox
 
             if selected_algorithm != self.current_algorithm {
                 self.current_algorithm = selected_algorithm;
-            }
+            }// End if
 
     }// End fn drop_down_menu
 
@@ -259,7 +265,8 @@ impl MyApp{
             SortAlgorithm::BubbleSort => bubble_sort(&mut list_copy),
             SortAlgorithm::InsertionSort => {insertion_sort(&mut list_copy)}
             SortAlgorithm::SelectionSort => {selection_sort(&mut list_copy)}
-        }
+        }// End match
+
     }// End fn generate_sorting_steps
 
     fn stop_button(&mut self){
@@ -267,7 +274,8 @@ impl MyApp{
         self.current_step = 0;
         self.comparing_indices.clear();
         self.sorted_indices = vec![false; self.list.len()];
-    }
+
+    }// End fn stop_button
 
 
 } // End impl MyApp
@@ -318,7 +326,7 @@ impl eframe::App for MyApp{
             ui.add_space(200.0);
             self.generate_bars(ui);
 
-        });
+        });// End of CentralPanel
     
     }// End of fn update
 

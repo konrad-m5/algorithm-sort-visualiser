@@ -1,9 +1,9 @@
 [package]
 name = "algo-app"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
 
 [dependencies]
-eframe = "0.28"
+eframe = "0.29"
 rand = "0.8"
-rodio ="0.17"
+rodio = "0.17"

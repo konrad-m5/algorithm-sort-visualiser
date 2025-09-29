@@ -1,10 +1,7 @@
-use eframe::egui;
 use rodio::{OutputStream, Sink, source::SineWave};
-use rand::Rng;
 
 mod gui;
-mod sort;  // Declare the sort module here
-use crate::sort::bubble_sort;  // Import from the crate root
+mod sort;  
 use gui::MyApp;
 
 fn main() -> Result<(), eframe::Error> {

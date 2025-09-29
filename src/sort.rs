@@ -1,6 +1,4 @@
-use crate::gui::SortAlgorithm;
 use crate::gui::SortingStep;
-
 
 // Bubble sort
 pub fn bubble_sort(list: &mut Vec<i32>) -> Vec<SortingStep> {
@@ -34,7 +32,7 @@ pub fn bubble_sort(list: &mut Vec<i32>) -> Vec<SortingStep> {
   steps
 }
 
-// Quick sort
+// Selection sort
 pub fn selection_sort(list: &mut Vec<i32>) -> Vec<SortingStep> {
   let mut steps = Vec::new();
   for i in 0..list.len() {
