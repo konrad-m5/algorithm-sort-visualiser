@@ -2,7 +2,7 @@ use eframe::egui;
 use rodio::{OutputStream, Sink, source::SineWave};
 use rand::Rng;
 use std::time::{Duration, Instant};
-use crate::sort::{bubble_sort, selection_sort, insertion_sort};
+use crate::sort::{bubble_sort, selection_sort, insertion_sort, merge_sort};
 
 // Struct for color settings
 pub struct drawColor{
@@ -36,6 +36,7 @@ pub enum SortAlgorithm{
     BubbleSort,
     InsertionSort,
     SelectionSort,
+    MergeSort,
 }
 
 // Enum for animation steps
@@ -250,6 +251,7 @@ impl MyApp{
                 ui.selectable_value(&mut selected_algorithm, SortAlgorithm::BubbleSort, "Bubble Sort");
                 ui.selectable_value(&mut selected_algorithm, SortAlgorithm::InsertionSort, "Insertion Sort");
                 ui.selectable_value(&mut selected_algorithm, SortAlgorithm::SelectionSort, "Selection Sort");
+                ui.selectable_value(&mut selected_algorithm, SortAlgorithm::MergeSort, "Merge Sort");
             });// End of ComboBox
 
             if selected_algorithm != self.current_algorithm {
@@ -265,6 +267,7 @@ impl MyApp{
             SortAlgorithm::BubbleSort => bubble_sort(&mut list_copy),
             SortAlgorithm::InsertionSort => {insertion_sort(&mut list_copy)}
             SortAlgorithm::SelectionSort => {selection_sort(&mut list_copy)}
+            SortAlgorithm::MergeSort => {merge_sort(&mut list_copy)}
         }// End match
 
     }// End fn generate_sorting_steps
