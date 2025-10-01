@@ -1,5 +1,3 @@
-use rodio::{OutputStream, Sink, source::SineWave};
-
 mod gui;
 mod sort;  
 use gui::MyApp;
