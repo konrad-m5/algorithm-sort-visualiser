@@ -4,7 +4,7 @@ use std::time::{Duration, Instant};
 use crate::sort::{bubble_sort, selection_sort, insertion_sort, merge_sort};
 
 // Struct for color settings
-pub struct DrawColour{
+pub struct DrawColor{
     bar:egui::Color32,
     background:egui::Color32,
     highlight:egui::Color32,
@@ -17,7 +17,7 @@ pub struct DrawColour{
 // Main application struct
 pub struct MyApp{
     list: Vec<i32>, // The list to be sorted
-    colors: DrawColour, // Color setting
+    colors: DrawColor, // Color setting
     is_sorting: bool, // Is the sorting process active
     current_step: usize, // Current step in the sorting process
     comparing_indices: Vec<usize>, // Indices currently being compared
@@ -48,7 +48,7 @@ pub enum SortingStep {
 }
 
 // Implement Default trait for MyApp
-impl Default for DrawColour{
+impl Default for DrawColor{
     fn default() -> Self{
         Self{
             bar:egui::Color32::from_rgb(0, 255, 0),
@@ -62,7 +62,7 @@ impl Default for DrawColour{
 
     }// End fn default
 
-}// End impl Default for DrawColour
+}// End impl Default for DrawColor
 
 
 // Implement Default trait for MyApp
@@ -79,7 +79,7 @@ impl Default for MyApp {
         
         Self {
             list,
-            colors: DrawColour::default(),
+            colors: DrawColor::default(),
             is_sorting: false,
             current_step: 0,
             comparing_indices: Vec::new(),
@@ -88,7 +88,7 @@ impl Default for MyApp {
             sorted_indices,
             animation_speed: Duration::from_millis(0), 
             last_update: Instant::now(),
-            speed_multiplier: 10,                    // Process 10 steps per frame
+            speed_multiplier: 10, // Process 10 steps per frame
 
         }// End Self
     
@@ -138,8 +138,8 @@ impl MyApp{
                     egui::Vec2::new(total_width, max_height),
                     egui::Sense::hover()
                 );
-            
-            
+
+                // Get the painting area
                 let rect = response.rect;
                 let baseline_y = rect.bottom(); // Common baseline at bottom
                 
@@ -165,7 +165,7 @@ impl MyApp{
                     let bar_rect = egui::Rect::from_min_size(
                         egui::pos2(x, baseline_y - bar_height), // Start from baseline, go up
                         egui::vec2(bar_width - 1.0, bar_height) // -1.0 for spacing
-                    );
+                    );// End let bar_rect
                 
                     painter.rect_filled(bar_rect, 0.0, color);
 
@@ -181,17 +181,18 @@ impl MyApp{
     fn update_animation(&mut self, ctx: &egui::Context) {
         if !self.is_sorting || self.current_step >= self.sorting_steps.len() {
             return;
-        }
+        }// End if
 
         // Check if enough time has passed
         if self.last_update.elapsed() >= self.animation_speed {
             // Process multiple steps per frame for ultra-fast animation
             let steps_per_frame = self.speed_multiplier; // Use dynamic speed multiplier
             
+            // Process the specified number of steps
             for _ in 0..steps_per_frame {
                 if self.current_step >= self.sorting_steps.len() {
                     break;
-                }
+                }// End if
                 
                 // Get current step
                 if let Some(step) = self.sorting_steps.get(self.current_step) {
@@ -222,31 +223,40 @@ impl MyApp{
 
                     }// End match
 
-                }// end inner if let
+                }// End inner if let
                 
                 // Move to next step
                 self.current_step += 1;
-            }
+            
+            }// End for loop
             
             self.last_update = Instant::now();
             ctx.request_repaint();
 
         }// End if 
+
         ctx.request_repaint();
+
     }// End fn update_animation
 
 
 
     // Dropdown menu for selecting sorting algorithm
     fn drop_down_menu(&mut self, ui: &mut egui::Ui) {
+
+        // Variable to hold selected algorithm
         let mut selected_algorithm = self.current_algorithm;
         egui::ComboBox::from_label("Select Algorithm")
             .selected_text(format!("{:?}", selected_algorithm))
             .show_ui(ui, |ui| {
+
                 ui.selectable_value(&mut selected_algorithm, SortAlgorithm::BubbleSort, "Bubble Sort");
                 ui.selectable_value(&mut selected_algorithm, SortAlgorithm::InsertionSort, "Insertion Sort");
                 ui.selectable_value(&mut selected_algorithm, SortAlgorithm::SelectionSort, "Selection Sort");
                 ui.selectable_value(&mut selected_algorithm, SortAlgorithm::MergeSort, "Merge Sort");
+                // Quick sort
+                // Heap sort
+
             });// End of ComboBox
 
             if selected_algorithm != self.current_algorithm {
@@ -257,16 +267,22 @@ impl MyApp{
 
     // Generate sorting steps based on selected algorithm
     fn generate_sorting_steps(&mut self) -> Vec<SortingStep> {
+
         let mut list_copy = self.list.clone();
         match self.current_algorithm {
+
             SortAlgorithm::BubbleSort => bubble_sort(&mut list_copy),
             SortAlgorithm::InsertionSort => {insertion_sort(&mut list_copy)}
             SortAlgorithm::SelectionSort => {selection_sort(&mut list_copy)}
             SortAlgorithm::MergeSort => {merge_sort(&mut list_copy)}
+            // Quick sort
+            // Heap sort
+
         }// End match
 
     }// End fn generate_sorting_steps
 
+    // Stop the sorting process
     fn stop_button(&mut self){
         self.is_sorting = false;
         self.current_step = 0;
@@ -284,64 +300,83 @@ impl eframe::App for MyApp{
     
     // Main update method called each frame
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame){
+
         // animation update
         self.update_animation(ctx);
 
-        // Global text colour
+        // Global text color
         ctx.style_mut(|style| {
             style.visuals.override_text_color = Some(egui::Color32::WHITE);
         });// End of ctx.style_mut
 
+        // Central panel for main content
         egui::CentralPanel::default()
+            // Set the background color
             .frame(
                 egui::Frame::default()
                     .fill(self.colors.background)
-            )
+            )// End frame
+
+            // Show the UI
             .show(ctx, |ui| {
                 // Top panel with buttons and dropdown menu
                 ui.horizontal(|ui| {
+
+                    // Generate random list button
                     let random_list_button = ui.add_sized([160.0, 30.0],
                         egui::Button::new("Generate random list")
                             .fill(egui::Color32::from_rgb(70, 130, 180))  // Blue background
                             .stroke(egui::Stroke::new(2.0, egui::Color32::WHITE))  // White border
-                    );
+
+                    );// End let random_list_button
 
                     if random_list_button.clicked(){
+
                         self.generate_random_list(100, 500);
                         self.sorting_steps.clear();
                         self.sorted_indices = vec![false; self.list.len()];
-                    }// end if
 
-                    let start_colour = if self.is_sorting {
+                    }// End if
+
+                    // Decides button color based on sorting state
+                    // If sorting is in progress, make the button grey else its green
+                    let start_color = if self.is_sorting {
                         egui::Color32::GRAY
                     } else {
                         egui::Color32::GREEN
-                    };
+                    };// End if else
 
+                    // Start sorting button
                     let start_button = ui.add_sized([120.0, 30.0],
                         egui::Button::new("Start sorting")
-                            .fill(start_colour)  // Green background
+                            .fill(start_color)  // Green background
                             .stroke(egui::Stroke::new(2.0, egui::Color32::WHITE))  // White border
-                    );
+                    );// End let start_button
 
                     if start_button.clicked(){
+                    
                         self.is_sorting = true;
                         self.current_step = 0;
                         self.comparing_indices.clear();
+                        
                         // Generate sorting steps based on algorithm
                         self.sorting_steps = self.generate_sorting_steps();
                         self.current_algorithm = self.current_algorithm;
-                    }
+                    
+                    }// End if
 
+                    // Stop sorting button
                     let stop_button = ui.add_sized([120.0, 30.0],
+                        
                         egui::Button::new("Stop sorting")
                             .fill(egui::Color32::RED)  // Red background
                             .stroke(egui::Stroke::new(2.0, egui::Color32::WHITE))  // White border
-                    );
+                    
+                        );// End let stop_button
 
                     if stop_button.clicked(){
                         self.stop_button();
-                    }// end if
+                    }// End if
 
                     // Dropdown menu for selecting sorting algorithm
                     self.drop_down_menu(ui);
@@ -350,13 +385,13 @@ impl eframe::App for MyApp{
                     ui.label("Speed:");
                     ui.add(egui::Slider::new(&mut self.speed_multiplier, 1..=100).text("steps/frame"));
 
-                });// end ui.horizontal
+                });// End ui.horizontal
 
                 // Some padding
                 ui.add_space(200.0);
                 self.generate_bars(ui);
 
-            });// end CentralPanel
+            });// End CentralPanel
 
     }// End fn update
 

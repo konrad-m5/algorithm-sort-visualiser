@@ -14,23 +14,28 @@ pub fn bubble_sort(list: &mut Vec<i32>) -> Vec<SortingStep> {
         list.swap(j, j + 1);
         steps.push(SortingStep::Swap(j, (j + 1)));
         swapped = true;
-      }// End inner if
+      }// End if
 
     }// End of inner loop
 
+    // Mark the last sorted element
     steps.push(SortingStep::SetSorted(n - i - 1));
 
     if !swapped {
       for k in 0..(n - i - 1) {
         steps.push(SortingStep::SetSorted(k));
-      }
+      
+      }// End inner for k loop
+      
       break;
-    }
-  }
+
+    }// End outer if
+
+  }// End of main for loop
 
   steps.push(SortingStep::Finished);
   steps
-}
+}// End of bubble_sort
 
 // Selection sort
 pub fn selection_sort(list: &mut Vec<i32>) -> Vec<SortingStep> {
@@ -41,21 +46,24 @@ pub fn selection_sort(list: &mut Vec<i32>) -> Vec<SortingStep> {
 
     for j in (i + 1)..list.len() {
       steps.push(SortingStep::Compare(j, small));
+      
       if list[j] < list[small] {
         small = j;
-      }
-    }
+      }// End if
+
+    }// End inner for j
+    
     if small != i {
       steps.push(SortingStep::Swap(i, small));
       list.swap(i, small);
-    }
+    }// End if
 
       steps.push(SortingStep::SetSorted(i));
-  }
+  }// End of main for loop
 
   steps.push(SortingStep::Finished);
   steps
-}
+}// End of selection_sort
 
 // Insertion sort
 pub fn insertion_sort(list: &mut Vec<i32>) -> Vec<SortingStep> {
@@ -65,20 +73,21 @@ pub fn insertion_sort(list: &mut Vec<i32>) -> Vec<SortingStep> {
 
   for i in 1..list.len() {
 
-    
     for j in (1..i + 1).rev() {
       steps.push(SortingStep::Compare(j - 1, j));
+      
       if list[j - 1] <= list[j] { break; }
 
       list.swap(j - 1, j);
       steps.push(SortingStep::Swap(j - 1, j));
-    }
+    }// End inner for j loop
 
     steps.push(SortingStep::SetSorted(i));
-  }
+  }// End of main for loop
+  
   steps.push(SortingStep::Finished);
   steps
-}
+}// End of insertion_sort
 
 // Merge sort
 pub fn merge_sort(list: &mut Vec<i32>) -> Vec<SortingStep> {
@@ -87,12 +96,14 @@ pub fn merge_sort(list: &mut Vec<i32>) -> Vec<SortingStep> {
 
     // Handle edge cases for empty or single-element lists
     if n <= 1 {
+        
         if n == 1 {
             steps.push(SortingStep::SetSorted(0));
-        }
+        }// End inner if
+        
         steps.push(SortingStep::Finished);
         return steps;
-    }
+    }// End if
     
     // Start the recursive merge sort process
     merge_sort_recursive_steps(list, 0, n, &mut steps);
@@ -100,11 +111,11 @@ pub fn merge_sort(list: &mut Vec<i32>) -> Vec<SortingStep> {
     // Mark all elements as sorted at the end
     for i in 0..n {
         steps.push(SortingStep::SetSorted(i));
-    }
+    }// End for
     
     steps.push(SortingStep::Finished);
     steps
-}
+}// End of merge_sort
 
 fn merge_sort_recursive_steps(
     list: &mut Vec<i32>,
@@ -114,7 +125,7 @@ fn merge_sort_recursive_steps(
 ) {
     if end - start <= 1 {
         return;
-    }
+    }// End if
     
     let mid = start + (end - start) / 2;
     
@@ -127,16 +138,21 @@ fn merge_sort_recursive_steps(
     let mut changed = true;
     while changed {
         changed = false;
-        for i in start..end-1 {
-            steps.push(SortingStep::Compare(i, i + 1));
-            if list[i] > list[i + 1] {
-                list.swap(i, i + 1);
-                steps.push(SortingStep::Swap(i, i + 1));
-                changed = true;
-            }
-        }
-    }
-}
 
-// Add more sorting algorithms as needed
+        for i in start..end-1 {
+          steps.push(SortingStep::Compare(i, i + 1));
+          
+          if list[i] > list[i + 1] {
+              list.swap(i, i + 1);
+              steps.push(SortingStep::Swap(i, i + 1));
+              changed = true;
+            }// End if
+        
+        }// End for
+    
+    }// End while
+
+}// End of merge_sort_recursive_steps
+
+// Quick sort and Heap sort
 
