@@ -147,7 +147,7 @@ impl MyApp{
                 painter.rect_filled(rect, 0.0, self.colors.background);
             
                 // Draw each bar from the baseline upward
-                // Enumerate used to get index and value of the list
+                // iter() gets values, enumerate() adds indices (0,1,2...)
                 for (i, &value) in self.list.iter().enumerate() {
                     let bar_height = (value as f32 / max_value) * max_height;
                     let x = rect.left() + (i as f32 * bar_width);
