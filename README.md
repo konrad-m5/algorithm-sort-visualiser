@@ -1,6 +1,6 @@
 # algorithm-sort-visualiser
-Simple program to visualise how sorting algorithm work. For now it contains bubble sort, insertion sort, and quick sort
+Simple program to visualise how sorting algorithm work. For now it contains bubble sort, insertion sort, and selection sort
 
 # To-do list:
-- Merge sort
 - Heap sort
+- Quick sort
